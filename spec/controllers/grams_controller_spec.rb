@@ -1,6 +1,48 @@
 require 'rails_helper'
 
 RSpec.describe GramsController, type: :controller do
+  describe "grams#udpate action" do 
+    it "should successfully update gram in database" do
+      gram = Gram.create(message: "Original")
+      # gram = FactoryGirl.create(:gram, message: "Original")
+      patch :update, id: gram.id, gram: { message: "New message"}
+      expect(response).to redirect_to root_path
+      gram.reload
+      expect(gram.message).to eq "New message"
+
+    end
+
+    it "should return 404 if gram not found" do
+      patch :update, id: 'Hi', gram: { message: 'Chaned'}
+      expect(response).to have_http_status(:not_found)
+
+    end
+
+    it "should render the edit form with status unprocessable_entity if blank" do 
+      # gram = FactoryGirl.create(:gram, message: "Original")
+      gram = Gram.create(message: "Original")
+      patch :update, id: gram.id, gram: { message: '' }
+      expect(response).to have_http_status(:unprocessable_entity)
+      gram.reload
+      expect(gram.message).to eq "Original"
+
+    end
+  end
+
+  describe "grams#edit action" do 
+    it "should successfully show the edit page if it is found" do
+      # gram = FactoryGirl.create(:gram)
+      gram = Gram.create(message: "hello")
+      get :edit, id: gram.id
+      expect(response).to have_http_status(:success)
+    end
+
+    it "should return a 404 message if the gram is not found" do 
+      get :edit, id: 'what'
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "grams#show action" do 
     it "should successfully show the page if gram is found" do
       # gram = FactoryGirl.create(:gram)
